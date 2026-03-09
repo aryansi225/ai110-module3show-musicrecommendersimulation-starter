@@ -1,19 +1,19 @@
-id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness
-1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18
-2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71
-3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10
-4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86
-5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05
-6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92
-7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89
-8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22
-9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78
-10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35
-11,Gold Chain Daydream,Westside Freq,hip-hop,nostalgic,0.72,95,0.74,0.85,0.12
-12,Moonlight Sonata Reboot,Clara Voss,classical,peaceful,0.18,52,0.72,0.22,0.97
-13,Shatter the Crown,Iron Veil,metal,angry,0.97,168,0.22,0.55,0.04
-14,Porch in July,Della Mae,folk,nostalgic,0.33,88,0.78,0.48,0.94
-15,Slow Burn,Kira James,r&b,romantic,0.55,85,0.80,0.69,0.43
-16,Neon Pulse,Circuit Drift,electronic,euphoric,0.88,140,0.76,0.92,0.03
-17,Dusty Road Home,Cal Briggs,country,sad,0.31,76,0.36,0.44,0.88
-18,Delta Hollow,Maren Blue,blues,melancholic,0.44,92,0.31,0.51,0.82
+id,title,artist,genre,mood,energy,tempo_bpm,valence,danceability,acousticness,popularity,release_decade,mood_tags
+1,Sunrise City,Neon Echo,pop,happy,0.82,118,0.84,0.79,0.18,78,2020,uplifting|bright|carefree|summery
+2,Midnight Coding,LoRoom,lofi,chill,0.42,78,0.56,0.62,0.71,61,2020,focused|calm|cozy|introspective
+3,Storm Runner,Voltline,rock,intense,0.91,152,0.48,0.66,0.10,55,2010,driving|aggressive|powerful|adrenaline
+4,Library Rain,Paper Lanterns,lofi,chill,0.35,72,0.60,0.58,0.86,74,2020,peaceful|cozy|calm|rainy
+5,Gym Hero,Max Pulse,pop,intense,0.93,132,0.77,0.88,0.05,82,2010,pumped|driving|triumphant|energetic
+6,Spacewalk Thoughts,Orbit Bloom,ambient,chill,0.28,60,0.65,0.41,0.92,43,2020,dreamy|ethereal|calm|spacious
+7,Coffee Shop Stories,Slow Stereo,jazz,relaxed,0.37,90,0.71,0.54,0.89,67,2000,warm|nostalgic|cozy|breezy
+8,Night Drive Loop,Neon Echo,synthwave,moody,0.75,110,0.49,0.73,0.22,59,2010,cinematic|nocturnal|tense|driving
+9,Focus Flow,LoRoom,lofi,focused,0.40,80,0.59,0.60,0.78,70,2020,productive|calm|minimal|introspective
+10,Rooftop Lights,Indigo Parade,indie pop,happy,0.76,124,0.81,0.82,0.35,65,2010,carefree|bright|romantic|summery
+11,Gold Chain Daydream,Westside Freq,hip-hop,nostalgic,0.72,95,0.74,0.85,0.12,71,2000,nostalgic|breezy|confident|throwback
+12,Moonlight Sonata Reboot,Clara Voss,classical,peaceful,0.18,52,0.72,0.22,0.97,48,2020,serene|contemplative|ethereal|delicate
+13,Shatter the Crown,Iron Veil,metal,angry,0.97,168,0.22,0.55,0.04,44,2010,aggressive|furious|cathartic|crushing
+14,Porch in July,Della Mae,folk,nostalgic,0.33,88,0.78,0.48,0.94,52,2000,nostalgic|warm|rustic|bittersweet
+15,Slow Burn,Kira James,r&b,romantic,0.55,85,0.80,0.69,0.43,76,2010,sensual|warm|intimate|romantic
+16,Neon Pulse,Circuit Drift,electronic,euphoric,0.88,140,0.76,0.92,0.03,63,2020,euphoric|energetic|bright|hypnotic
+17,Dusty Road Home,Cal Briggs,country,sad,0.31,76,0.36,0.44,0.88,49,2000,melancholic|longing|rustic|bittersweet
+18,Delta Hollow,Maren Blue,blues,melancholic,0.44,92,0.31,0.51,0.82,57,1990,melancholic|longing|soulful|introspective
