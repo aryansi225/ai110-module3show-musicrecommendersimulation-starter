@@ -29,9 +29,9 @@ class UserProfile:
 # ---------------------------------------------------------------------------
 # Maximum possible score: 5.75
 #
-#   +2.00  genre match      — exact string match on favorite_genre
+#   +1.00  genre match      — exact string match on favorite_genre
 #   +1.50  mood match       — exact string match on favorite_mood
-#   +1.00  energy fit       — 1.0 * (1 - |song.energy - target_energy|)
+#   +2.00  energy fit       — 2.0 * (1 - |song.energy - target_energy|)
 #   +0.75  valence fit      — 0.75 * (1 - |song.valence - target_valence|)
 #                             target_valence is derived from mood (see below)
 #   +0.50  acousticness fit — song.acousticness if likes_acoustic
@@ -63,19 +63,19 @@ def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
     score = 0.0
     reasons = []
 
-    # --- Genre match: +2.0 ---
+    # --- Genre match: +1.0 (halved for weight-shift experiment) ---
     if song.get("genre") == user_prefs.get("favorite_genre"):
-        score += 2.0
-        reasons.append(f"genre match (+2.0)")
+        score += 1.0
+        reasons.append(f"genre match (+1.0)")
 
     # --- Mood match: +1.5 ---
     if song.get("mood") == user_prefs.get("favorite_mood"):
         score += 1.5
         reasons.append(f"mood match (+1.5)")
 
-    # --- Energy proximity: 0–1.0 ---
+    # --- Energy proximity: 0–2.0 (doubled for weight-shift experiment) ---
     target_energy = user_prefs.get("target_energy", 0.5)
-    energy_score = round(1.0 * (1.0 - abs(song["energy"] - target_energy)), 4)
+    energy_score = round(2.0 * (1.0 - abs(song["energy"] - target_energy)), 4)
     score += energy_score
     reasons.append(f"energy proximity (+{energy_score:.2f})")
 
