@@ -21,37 +21,37 @@ Real-world recommenders like Spotify or YouTube learn from millions of listening
 
 ### Song Features Used
 
-| Feature | Type | Role in scoring |
-|---|---|---|
-| `genre` | categorical | Hard preference match |
-| `mood` | categorical | Hard preference match |
-| `energy` | float 0–1 | Proximity to user's target energy |
-| `valence` | float 0–1 | Proximity to user's preferred positiveness |
-| `acousticness` | float 0–1 | Rewards acoustic or electronic preference |
-| `tempo_bpm` | integer | Secondary tiebreaker (normalized) |
-| `danceability` | float 0–1 | Available on `Song`; not weighted by default |
+| Feature        | Type        | Role in scoring                              |
+| -------------- | ----------- | -------------------------------------------- |
+| `genre`        | categorical | Hard preference match                        |
+| `mood`         | categorical | Hard preference match                        |
+| `energy`       | float 0–1   | Proximity to user's target energy            |
+| `valence`      | float 0–1   | Proximity to user's preferred positiveness   |
+| `acousticness` | float 0–1   | Rewards acoustic or electronic preference    |
+| `tempo_bpm`    | integer     | Secondary tiebreaker (normalized)            |
+| `danceability` | float 0–1   | Available on `Song`; not weighted by default |
 
 ### UserProfile Fields
 
-| Field | Type | Used for |
-|---|---|---|
-| `favorite_genre` | string | Genre match signal |
-| `favorite_mood` | string | Mood match signal |
-| `target_energy` | float 0–1 | Energy proximity scoring |
-| `likes_acoustic` | bool | Acousticness direction (high vs. low) |
+| Field            | Type      | Used for                              |
+| ---------------- | --------- | ------------------------------------- |
+| `favorite_genre` | string    | Genre match signal                    |
+| `favorite_mood`  | string    | Mood match signal                     |
+| `target_energy`  | float 0–1 | Energy proximity scoring              |
+| `likes_acoustic` | bool      | Acousticness direction (high vs. low) |
 
 ### Algorithm Recipe (Finalized)
 
 Each song is scored against the user profile using this point system:
 
-| Rule | Max Points | Formula |
-|---|---|---|
-| Genre exact match | +2.00 | `2.0 if song.genre == favorite_genre` |
-| Mood exact match | +1.50 | `1.5 if song.mood == favorite_mood` |
-| Energy proximity | +1.00 | `1.0 × (1 − \|song.energy − target_energy\|)` |
-| Valence proximity | +0.75 | `0.75 × (1 − \|song.valence − target_valence\|)` |
-| Acousticness fit | +0.50 | `0.5 × acousticness` or `0.5 × (1 − acousticness)` |
-| **Max total** | **5.75** | |
+| Rule              | Max Points | Formula                                            |
+| ----------------- | ---------- | -------------------------------------------------- |
+| Genre exact match | +2.00      | `2.0 if song.genre == favorite_genre`              |
+| Mood exact match  | +1.50      | `1.5 if song.mood == favorite_mood`                |
+| Energy proximity  | +1.00      | `1.0 × (1 − \|song.energy − target_energy\|)`      |
+| Valence proximity | +0.75      | `0.75 × (1 − \|song.valence − target_valence\|)`   |
+| Acousticness fit  | +0.50      | `0.5 × acousticness` or `0.5 × (1 − acousticness)` |
+| **Max total**     | **5.75**   |                                                    |
 
 Songs are then **ranked in descending score order**. Ties are broken by energy proximity (closer wins). The top `k` are returned with a plain-language explanation.
 
@@ -96,6 +96,10 @@ flowchart TD
 
 ---
 
+## Screenshots
+
+## ![alt text](image.png)
+
 ## Getting Started
 
 ### Setup
@@ -106,6 +110,8 @@ flowchart TD
    python -m venv .venv
    source .venv/bin/activate      # Mac or Linux
    .venv\Scripts\activate         # Windows
+
+   ```
 
 2. Install dependencies
 
@@ -166,12 +172,11 @@ Write 1 to 2 paragraphs here about what you learned:
 - about how recommenders turn data into predictions
 - about where bias or unfairness could show up in systems like this
 
-
 ---
 
 ## 7. `model_card_template.md`
 
-Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}  
+Combines reflection and model card framing from the Module 3 guidance. :contentReference[oaicite:2]{index=2}
 
 ```markdown
 # 🎧 Model Card - Music Recommender Simulation
@@ -223,6 +228,7 @@ Describe your dataset.
 Where does your recommender work well
 
 You can think about:
+
 - Situations where the top results "felt right"
 - Particular user profiles it served well
 - Simplicity or transparency benefits
@@ -234,6 +240,7 @@ You can think about:
 Where does your recommender struggle
 
 Some prompts:
+
 - Does it ignore some genres or moods
 - Does it treat all users as if they have the same taste shape
 - Is it biased toward high energy or one genre by default
@@ -246,6 +253,7 @@ Some prompts:
 How did you check your system
 
 Examples:
+
 - You tried multiple user profiles and wrote down whether the results matched your expectations
 - You compared your simulation to what a real app like Spotify or YouTube tends to recommend
 - You wrote tests for your scoring logic
@@ -273,4 +281,4 @@ A few sentences about what you learned:
 - What surprised you about how your system behaved
 - How did building this change how you think about real music recommenders
 - Where do you think human judgment still matters, even if the model seems "smart"
-
+```

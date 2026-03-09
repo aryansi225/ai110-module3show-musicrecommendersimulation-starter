@@ -4,10 +4,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Song:
-    """
-    Represents a song and its attributes.
-    Required by tests/test_recommender.py
-    """
+    """A single song and its audio attributes loaded from the CSV catalog."""
     id: int
     title: str
     artist: str
@@ -21,10 +18,7 @@ class Song:
 
 @dataclass
 class UserProfile:
-    """
-    Represents a user's taste preferences.
-    Required by tests/test_recommender.py
-    """
+    """A user's stated taste preferences used to score and rank songs."""
     favorite_genre: str
     favorite_mood: str
     target_energy: float
@@ -64,29 +58,26 @@ _MOOD_VALENCE = {
 }
 
 
-def _score_song(song: Dict, user_prefs: Dict) -> Tuple[float, str]:
-    """
-    Apply the algorithm recipe to a single song.
-    Returns (total_score, explanation_string).
-    """
+def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
+    """Return (total_score, reasons) by applying the 5-rule algorithm recipe to one song."""
     score = 0.0
     reasons = []
 
     # --- Genre match: +2.0 ---
     if song.get("genre") == user_prefs.get("favorite_genre"):
         score += 2.0
-        reasons.append(f"genre match ({song['genre']})")
+        reasons.append(f"genre match (+2.0)")
 
     # --- Mood match: +1.5 ---
     if song.get("mood") == user_prefs.get("favorite_mood"):
         score += 1.5
-        reasons.append(f"mood match ({song['mood']})")
+        reasons.append(f"mood match (+1.5)")
 
     # --- Energy proximity: 0–1.0 ---
     target_energy = user_prefs.get("target_energy", 0.5)
-    energy_score = 1.0 * (1.0 - abs(song["energy"] - target_energy))
+    energy_score = round(1.0 * (1.0 - abs(song["energy"] - target_energy)), 4)
     score += energy_score
-    reasons.append(f"energy {song['energy']} vs target {target_energy} (+{energy_score:.2f})")
+    reasons.append(f"energy proximity (+{energy_score:.2f})")
 
     # --- Valence proximity: 0–0.75 ---
     # Use explicit target_valence if provided, otherwise derive from mood
@@ -94,32 +85,37 @@ def _score_song(song: Dict, user_prefs: Dict) -> Tuple[float, str]:
         "target_valence",
         _MOOD_VALENCE.get(user_prefs.get("favorite_mood", ""), 0.5)
     )
-    valence_score = 0.75 * (1.0 - abs(song["valence"] - target_valence))
+    valence_score = round(0.75 * (1.0 - abs(song["valence"] - target_valence)), 4)
     score += valence_score
-    reasons.append(f"valence {song['valence']} vs target {target_valence:.2f} (+{valence_score:.2f})")
+    reasons.append(f"valence proximity (+{valence_score:.2f})")
 
     # --- Acousticness fit: 0–0.5 ---
     likes_acoustic = user_prefs.get("likes_acoustic", False)
     if likes_acoustic:
-        acoustic_score = 0.5 * song["acousticness"]
+        acoustic_score = round(0.5 * song["acousticness"], 4)
     else:
-        acoustic_score = 0.5 * (1.0 - song["acousticness"])
+        acoustic_score = round(0.5 * (1.0 - song["acousticness"]), 4)
     score += acoustic_score
     reasons.append(f"acousticness fit (+{acoustic_score:.2f})")
 
-    explanation = "; ".join(reasons)
-    return round(score, 4), explanation
+    return round(score, 4), reasons
+
+
+def _score_song(song: Dict, user_prefs: Dict) -> Tuple[float, str]:
+    """Internal helper: returns (score, explanation_string) for pipeline use."""
+    total, reasons = score_song(user_prefs, song)
+    return total, "; ".join(reasons)
 
 
 class Recommender:
-    """
-    OOP implementation of the recommendation logic.
-    Required by tests/test_recommender.py
-    """
+    """OOP wrapper around the scoring and ranking logic for use in tests."""
+
     def __init__(self, songs: List[Song]):
+        """Store the song catalog for repeated recommendation calls."""
         self.songs = songs
 
     def recommend(self, user: UserProfile, k: int = 5) -> List[Song]:
+        """Return the top-k Song objects best matching the given UserProfile."""
         user_prefs = {
             "favorite_genre": user.favorite_genre,
             "favorite_mood":  user.favorite_mood,
@@ -140,6 +136,7 @@ class Recommender:
         return [s for s, _ in scored[:k]]
 
     def explain_recommendation(self, user: UserProfile, song: Song) -> str:
+        """Return a semicolon-joined string of scoring reasons for one song."""
         user_prefs = {
             "favorite_genre": user.favorite_genre,
             "favorite_mood":  user.favorite_mood,
@@ -156,10 +153,7 @@ class Recommender:
 
 
 def load_songs(csv_path: str) -> List[Dict]:
-    """
-    Loads songs from a CSV file.
-    Required by src/main.py
-    """
+    """Read songs.csv and return a list of dicts with numeric fields cast to float."""
     songs = []
     with open(csv_path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -174,12 +168,15 @@ def load_songs(csv_path: str) -> List[Dict]:
 
 
 def recommend_songs(user_prefs: Dict, songs: List[Dict], k: int = 5) -> List[Tuple[Dict, float, str]]:
-    """
-    Functional implementation of the recommendation logic.
-    Required by src/main.py
-    Returns list of (song_dict, score, explanation) sorted by score descending.
-    """
-    scored = [(_score_song(song, user_prefs) + (song,)) for song in songs]
-    # scored items: (score, explanation, song)
-    scored.sort(key=lambda x: x[0], reverse=True)
-    return [(song, score, explanation) for score, explanation, song in scored[:k]]
+    """Score every song, sort by score descending, and return the top-k as (song, score, explanation) tuples."""
+    # Step 1: score every song — build list of (song, score, joined_reasons)
+    scored = []
+    for song in songs:
+        total, reasons = score_song(user_prefs, song)
+        scored.append((song, total, "; ".join(reasons)))
+
+    # Step 2: rank highest score first (sorted returns a new list)
+    ranked = sorted(scored, key=lambda item: item[1], reverse=True)
+
+    # Step 3: slice top k
+    return ranked[:k]
