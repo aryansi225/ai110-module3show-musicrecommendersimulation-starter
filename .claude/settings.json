@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes @mermaid-js/mermaid-cli --version)",
+      "Bash(npx --yes @mermaid-js/mermaid-cli mmdc -i docs/data_flow.mmd -o docs/data_flow.png -b white)",
+      "Bash(npx @mermaid-js/mermaid-cli -i docs/data_flow.mmd -o docs/data_flow.png -b white)",
+      "Bash(python3 -c \"import matplotlib; import matplotlib.patches; print\\(''ok''\\)\")",
+      "Bash(pip install matplotlib --quiet)"
+    ]
+  }
+}

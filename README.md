@@ -17,17 +17,82 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
+Real-world recommenders like Spotify or YouTube learn from millions of listening events to predict what a user will enjoy next. They combine collaborative filtering (what similar users liked) with content-based signals (the properties of the song itself). This simulation focuses purely on the content-based side: it compares the attributes of each song against a user's stated preferences and assigns a score. The system prioritizes **mood and genre matching** as the strongest signals of musical taste, then uses **energy proximity** to fine-tune results — rewarding songs whose energy level is close to what the user wants rather than simply the highest or lowest. Valence (musical positiveness) and acousticness round out the score to distinguish songs that might share a genre and energy level but feel emotionally different.
 
-Some prompts to answer:
+### Song Features Used
 
-- What features does each `Song` use in your system
-  - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
+| Feature | Type | Role in scoring |
+|---|---|---|
+| `genre` | categorical | Hard preference match |
+| `mood` | categorical | Hard preference match |
+| `energy` | float 0–1 | Proximity to user's target energy |
+| `valence` | float 0–1 | Proximity to user's preferred positiveness |
+| `acousticness` | float 0–1 | Rewards acoustic or electronic preference |
+| `tempo_bpm` | integer | Secondary tiebreaker (normalized) |
+| `danceability` | float 0–1 | Available on `Song`; not weighted by default |
 
-You can include a simple diagram or bullet list if helpful.
+### UserProfile Fields
+
+| Field | Type | Used for |
+|---|---|---|
+| `favorite_genre` | string | Genre match signal |
+| `favorite_mood` | string | Mood match signal |
+| `target_energy` | float 0–1 | Energy proximity scoring |
+| `likes_acoustic` | bool | Acousticness direction (high vs. low) |
+
+### Algorithm Recipe (Finalized)
+
+Each song is scored against the user profile using this point system:
+
+| Rule | Max Points | Formula |
+|---|---|---|
+| Genre exact match | +2.00 | `2.0 if song.genre == favorite_genre` |
+| Mood exact match | +1.50 | `1.5 if song.mood == favorite_mood` |
+| Energy proximity | +1.00 | `1.0 × (1 − \|song.energy − target_energy\|)` |
+| Valence proximity | +0.75 | `0.75 × (1 − \|song.valence − target_valence\|)` |
+| Acousticness fit | +0.50 | `0.5 × acousticness` or `0.5 × (1 − acousticness)` |
+| **Max total** | **5.75** | |
+
+Songs are then **ranked in descending score order**. Ties are broken by energy proximity (closer wins). The top `k` are returned with a plain-language explanation.
+
+### Expected Biases and Limitations
+
+- **Genre over-prioritization.** Genre carries 2.0 of 5.75 points (35%). A great song in a related genre (e.g. metal for a rock listener) scores 0 for genre and will rank below a mediocre exact-genre match. The system may filter out genuinely good fits that cross genre boundaries.
+- **Mood rigidity.** Mood adds another 1.5 points, meaning genre + mood together account for 61% of the maximum score. Any song that misses both will be buried regardless of how well its audio features match — even if it would sound right to a human listener.
+- **Catalog skew.** With only 18 songs, some genres have a single representative. A folk fan will always see the same song at the top; there is no diversity within the match.
+- **No listening history.** The system has no memory. It recommends the same songs every time for the same profile, with no novelty or discovery.
+- **Binary acousticness.** `likes_acoustic` is true/false. A user who likes "a little acoustic texture" gets the same weight as one who exclusively listens to unplugged recordings.
+
+### Data Flow Diagram
+
+![Data Flow Diagram](docs/data_flow.png)
+
+```mermaid
+flowchart TD
+    A([User Preferences\nfavorite_genre · favorite_mood\ntarget_energy · likes_acoustic]) --> C
+
+    B[(data/songs.csv\n18 songs)] --> C
+
+    C[load_songs\nparse CSV rows into dicts\ncast numeric fields to float]
+
+    C --> D{For each song\nin catalog}
+
+    D --> E1[+2.0 if genre matches\nfavorite_genre]
+    D --> E2[+1.5 if mood matches\nfavorite_mood]
+    D --> E3[+1.0 × energy proximity\n1 − |song.energy − target_energy|]
+    D --> E4[+0.75 × valence proximity\n1 − |song.valence − target_valence|]
+    D --> E5[+0.5 × acousticness fit\nsong.acousticness or 1 − acousticness]
+
+    E1 & E2 & E3 & E4 & E5 --> F[Sum all points\nmax possible = 5.75]
+
+    F --> G[(scored_songs list\nsong · score · explanation)]
+
+    G --> H[Sort descending by score\ntie-break by energy proximity]
+
+    H --> I[Slice top k results]
+
+    I --> J([Output\nRanked top-k songs\nwith scores and explanations])
+```
 
 ---
 

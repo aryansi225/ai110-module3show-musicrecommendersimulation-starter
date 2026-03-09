@@ -1,0 +1,23 @@
+flowchart TD
+    A([User Preferences\nfavorite_genre · favorite_mood\ntarget_energy · likes_acoustic]) --> C
+    B[(data/songs.csv\n18 songs)] --> C
+
+    C[load_songs\nparse CSV rows into dicts\ncast numeric fields to float]
+
+    C --> D{For each song\nin catalog}
+
+    D --> E1[+2.0 if genre matches\nfavorite_genre]
+    D --> E2[+1.5 if mood matches\nfavorite_mood]
+    D --> E3[+1.0 x energy proximity\n1 - abs song.energy - target_energy]
+    D --> E4[+0.75 x valence proximity\n1 - abs song.valence - target_valence]
+    D --> E5[+0.5 x acousticness fit\nsong.acousticness or 1 - acousticness]
+
+    E1 & E2 & E3 & E4 & E5 --> F[Sum all points\nmax possible = 5.75]
+
+    F --> G[(scored_songs list\nsong - score - explanation)]
+
+    G --> H[Sort descending by score\ntie-break by energy proximity]
+
+    H --> I[Slice top k results]
+
+    I --> J([Output\nRanked top-k songs\nwith scores and explanations])
